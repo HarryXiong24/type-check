@@ -10,13 +10,3 @@ export const toString = (variable: unknown): string =>
     : typeof variable === 'undefined'
     ? 'undefined'
     : (variable as string | number | boolean).toString();
-
-console.log(
-  toString({
-    a: {
-      b: {
-        c: 1,
-      },
-    },
-  })
-);

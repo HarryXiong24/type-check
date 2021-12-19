@@ -7,6 +7,7 @@ export interface TypeOption<T = unknown> {
   additional?: T[];
 }
 
+// 检查类型
 export const checkType = <T = unknown>(
   variable: T,
   type: string[] | string | TypeOption<T>,
@@ -17,8 +18,9 @@ export const checkType = <T = unknown>(
     return fork<T>(variable, type, variableName);
   }
 
-  // 处理 { type: 'boolean', enum: [true] } 这样的
+  // 处理 { type: 'boolean', enum: [true], additional: [] } 这样的
   if (typeof type === 'object') {
+    // 判断是否有枚举式的类型
     if (type.enum) {
       if (type.enum.includes(variable)) {
         return true;
@@ -33,6 +35,7 @@ export const checkType = <T = unknown>(
       return false;
     }
 
+    // 判断是否有 additional
     if (
       type.additional &&
       type.additional.some((value) => variable === value)
@@ -40,6 +43,7 @@ export const checkType = <T = unknown>(
       return true;
     }
 
+    // 没有特殊配置的话，直接走 fork 链路判断
     return fork<T>(variable, type.type, variableName);
   }
 
@@ -48,6 +52,7 @@ export const checkType = <T = unknown>(
   return false;
 };
 
+// 检查对象里的类型
 export const checkKeys = <T = unknown>(
   obj: T,
   config: Record<string, string[] | string | TypeOption>,
