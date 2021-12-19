@@ -9,11 +9,11 @@ export const assertType = <T = unknown>(variable: T, type: string): boolean => {
   if (type === 'null') {
     return variable === null;
   }
-  // 针对其他
+  // 针对一般的，因为 array 和 null 会被识别成 object
   if (['number', 'string', 'boolean', 'undefined'].includes(type)) {
     return typeof variable === type;
   }
-  // 对于对象，array 和 null 也会当做是对象，所以要加以判断
+  // 对于普通对象，array 和 null 也会当做是对象，所以要加以判断
   if (type === 'object') {
     return (
       !Array.isArray(variable) &&
@@ -22,16 +22,18 @@ export const assertType = <T = unknown>(variable: T, type: string): boolean => {
     );
   }
 
-  // 匹配 xxx[]
+  // 处理 'xxx[]'
   const arrayMatchResult = /(.*)\[\]/u.exec(type);
 
   if (arrayMatchResult) {
+    // 首先判断变量是不是一个数组，如果不是直接返回
     if (!Array.isArray(variable)) {
       return false;
     }
-    // itemType 就是类型
+    // itemType 就是数量里元素的类型
     const itemType = arrayMatchResult[1];
 
+    // 判断数组里的每个变量是不是都是这个类型
     return variable.every((item) => assertType(item, itemType));
   }
 
@@ -39,20 +41,25 @@ export const assertType = <T = unknown>(variable: T, type: string): boolean => {
   const objectMatchResult = /Record<(.*), ?(.*)>/u.exec(type);
 
   if (objectMatchResult) {
+    // 判断正常对象，排除 array 和 null
     if (
       typeof variable === 'object' &&
       !Array.isArray(variable) &&
       variable !== null
     ) {
+      // key 的类型
       const keyType = objectMatchResult[1];
+      // 值的类型
       const contentType = objectMatchResult[2];
 
       for (const key in variable) {
+        // 判断 key
         if (typeof key !== keyType) {
           console.error(`应为 ${type}，但键 ${key} 为 ${typeof key}`);
           return false;
         }
 
+        // 判断值
         if (
           typeof (variable as Record<string | number | symbol, unknown>)[
             key

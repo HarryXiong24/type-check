@@ -1,5 +1,5 @@
 import { toString } from './utils/toString';
-import { assertTypes } from './assertTypes';
+import { fork } from './fork';
 
 export interface TypeOption<T = unknown> {
   type: string | string[];
@@ -12,12 +12,17 @@ export const checkType = <T = unknown>(
   type: string[] | string | TypeOption<T>,
   variableName = ''
 ): boolean => {
-  if (typeof type === 'string' || Array.isArray(type))
-    return assertTypes<T>(variable, type, variableName);
+  // 处理 'object' 或者 ['string', 'number', 'boolean'] 这样的
+  if (typeof type === 'string' || Array.isArray(type)) {
+    return fork<T>(variable, type, variableName);
+  }
 
+  // 处理 { type: 'boolean', enum: [true] } 这样的
   if (typeof type === 'object') {
     if (type.enum) {
-      if (type.enum.includes(variable)) return true;
+      if (type.enum.includes(variable)) {
+        return true;
+      }
 
       console.error(
         `${variableName} 应为 ${type.enum.join(
@@ -28,10 +33,14 @@ export const checkType = <T = unknown>(
       return false;
     }
 
-    if (type.additional && type.additional.some((value) => variable === value))
+    if (
+      type.additional &&
+      type.additional.some((value) => variable === value)
+    ) {
       return true;
+    }
 
-    return assertTypes<T>(variable, type.type, variableName);
+    return fork<T>(variable, type.type, variableName);
   }
 
   console.error(`未知类型配置 ${toString(type)}`);
