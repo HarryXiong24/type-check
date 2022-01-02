@@ -1,8 +1,5 @@
 <h1 align="center">Welcome to type-check 👋</h1>
 <p>
-  <a href="https://www.npmjs.com/package/type-check" target="_blank">
-    <img alt="Version" src="https://img.shields.io/npm/v/type-check.svg">
-  </a>
   <a href="#" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
   </a>
